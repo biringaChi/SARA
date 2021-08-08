@@ -1,15 +1,13 @@
 import os
-import typing
 import javalang
 import pandas as pd
-from javalang.ast import Node
+from pandas.core.frame import DataFrame
 from javalang.tree import CompilationUnit
-from javalang.parser import JavaParserError, JavaSyntaxError
-from typing import Callable, Tuple, Dict, List, Sequence, Set, Text, Union, TypeVar
+from javalang.parser import JavaSyntaxError
+from typing import Tuple, Dict, List, Sequence, Set, Text, Union, TypeVar
 
 Sourcecode = TypeVar("Sourcecode")
 FeatureVec = TypeVar("FeatureVec")
-
 
 class HandleCodeRepo:
 	@property
@@ -60,7 +58,7 @@ class HandleCodeRepo:
 				},
 			}
 
-	def read_data(self):
+	def read_data(self) -> DataFrame:
 		try:
 			return pd.read_csv(self._GET_DATA_DIR)
 		except FileNotFoundError as e:
@@ -81,17 +79,16 @@ class HandleCodeRepo:
 	def unit_integration_test(self) -> List[float]:
 		return [code for code in self.read_data()["unit_integration_test"]]
 
-	
 	def get_trees(self, code) -> Union[Tuple[List[CompilationUnit], Dict[int, str]]]:
 		trees = []
 		uncompiled_sourcecode = {}
 
 		for idx, sourcecode in enumerate(code):
 			try:
-				tree = javalang.parse.parse(sourcecode)
-				trees.append(tree)
+				trees.append(javalang.parse.parse(sourcecode))
 			except JavaSyntaxError as e:
 				uncompiled_sourcecode[idx] = sourcecode
 				trees.append(None)
 
 		return trees, uncompiled_sourcecode
+		

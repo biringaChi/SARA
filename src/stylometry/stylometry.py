@@ -1,19 +1,11 @@
 import sys
-from os.path import dirname, abspath
-sys.path.append(dirname(dirname(abspath(__file__))))
-
-from typing import Dict, List, Tuple, Union, Set, TypeVar
-from utils.util import FeatureVec, HandleCodeRepo, Sourcecode
-import numpy as np
-import csv
 import re
-from math import log10
-import javalang
-from gensim import models
-from javalang.ast import Node
-from javalang.tree import CompilationUnit
-from javalang.parser import JavaParserError, JavaSyntaxError
+import numpy as np
+from os.path import dirname, abspath
+from typing import Dict, List, Tuple, Union, Set
 
+sys.path.append(dirname(dirname(abspath(__file__))))
+from utils.util import HandleCodeRepo, Sourcecode, FeatureVec
 
 class Helper(HandleCodeRepo):
     def __init__(self) -> None:
@@ -52,13 +44,11 @@ class Helper(HandleCodeRepo):
             for feature_arg in args:
                 temp = []
                 for file_length, feature_frequency in zip(self.get_file_length(), feature_arg):
-                    with np.errstate(divide="ignore"):
+                    with np.errstate(divide = "ignore"):
                         temp.append(-np.log10(feature_frequency / file_length))
                 features.append(temp)
             return features
-        raise ValueError(
-            "Invalid argument. Only a feature sequence is accepted")
-
+        raise ValueError("Invalid argument. Only a feature sequence is accepted")
 
 class Layout(Helper):
     def __init__(self) -> None:
@@ -78,7 +68,6 @@ class Layout(Helper):
 
         return emptylines, codelines, spaces, tabs
 
-
 class Lexical(Helper):
     def __init__(self) -> None:
         super().__init__()
@@ -97,8 +86,7 @@ class Lexical(Helper):
             methods.append(self.__len__([True for _, node in tree if node.__class__.__name__ in "MethodDeclaration" or "MethodReference"]))
 
         return imports, comments, keywords, methods
-
-
+    
 class Syntactic(Helper):
     def __init__(self) -> None:
         super().__init__()
@@ -106,16 +94,28 @@ class Syntactic(Helper):
     def __repr__(self) -> str:
         return self.__str__()
 
+    def get_frequency(self) -> Tuple[List[float]]:
+        trees, _ = self.get_trees(self.get_sourcecode())
+        conditionals, literals, loops, nodes = ([] for _ in range(4))
+
+        for tree in trees:
+            conditionals.append(self.__len__([True for _, node in tree if node.__class__.__name__ in ("IfStatement", "SwitchStatement")]))
+            literals.append(self.__len__([True for _, node in tree if node.__class__.__name__ in "Literal"]))
+            loops.append(self.__len__([True for _, node in tree if node.__class__.__name__ in ("ForStatement", "WhileStatement", "DoStatement")]))
+            nodes.append(self.__len__([True for _, node in tree if node]))
+
+        return conditionals, literals, loops, nodes 
 
 class Extractor(Helper):
     def __init__(self) -> None:
         super().__init__()
 
-    def extract(self):
+    def extract(self) -> FeatureVec:
         emptylines, codelines, spaces, tabs = Layout().get_frequency()
         imports, comments, keywords, methods = Lexical().get_frequency()
-        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods = self.feature_extractor(
-        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods)
+        conditionals, literals, loops, nodes  = Syntactic().get_frequency()
+        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes  = self.feature_extractor(
+        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes)
         
         
         return {
@@ -126,6 +126,9 @@ class Extractor(Helper):
             "imports" : imports,
             "comments" : comments,
             "keywords" : keywords,
-            "methods" : methods
+            "methods" : methods, 
+            "conditionals" : conditionals,
+            "literals" : literals,
+            "loops" : loops,
+            "nodes" : nodes
     	}
-        

@@ -1,25 +1,21 @@
 import sys
-from os.path import dirname, abspath
-sys.path.append(dirname(dirname(abspath(__file__))))
-from gensim import models
-from javalang.ast import Node
-from javalang.tree import CompilationUnit
-from javalang.parser import JavaParserError, JavaSyntaxError
-
 import csv
 import numpy as np
-import javalang
-from typing import Dict, List, Sequence, Text, Tuple, Union, Set
+from gensim import models
+from javalang.ast import Node
 from nltk import RegexpTokenizer
-from gensim.models import KeyedVectors
 from gensim.models import Word2Vec
+from os.path import dirname, abspath
+from gensim.models import KeyedVectors
+from javalang.parser import JavaParserError
+from typing import Dict, List, Sequence, Text, Tuple, Union, Set
+
+sys.path.append(dirname(dirname(abspath(__file__))))
 from utils.util import HandleCodeRepo
-import matplotlib.pyplot as plt
 
 """
 Creates an Abstract Syntax Tree (AST) embedding structure.
 """
-
 
 class TreeEmbeddings(HandleCodeRepo):
 	def __init__(self) -> None:
