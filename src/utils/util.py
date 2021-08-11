@@ -12,8 +12,10 @@ FeatureVec = TypeVar("FeatureVec")
 class HandleCodeRepo:
 	@property
 	def _GET_DATA_DIR(self) -> List[str]:
+		# TODO check if dataset is present, then select, else download from repo
+		
 		datasets = {"AddressBook" : "addressbook.csv", "DSpace" : "dspace.csv"} 
-		return os.path.join("./data", datasets.get("AddressBook")) # select dataset
+		return os.path.join("./dataset", datasets.get("AddressBook")) # select dataset
 
 	def __str__(self) -> str:
 		return f"{self.__class__.__name__}({self._GET_DATA_DIR})"

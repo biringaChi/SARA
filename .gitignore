@@ -134,9 +134,6 @@ scratch.txt
 # IDE settings
 *.vscode
 
-# Data
-data
-
 # iPython Notebooks
 *.ipynb
 
@@ -149,3 +146,6 @@ setup.py
 
 # Miscellaneous
 explore.py
+
+# Dataset
+dataset
