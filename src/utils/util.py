@@ -12,10 +12,8 @@ FeatureVec = TypeVar("FeatureVec")
 class HandleCodeRepo:
 	@property
 	def _GET_DATA_DIR(self) -> List[str]:
-		# TODO check if dataset is present, then select, else download from repo
-		
 		datasets = {"AddressBook" : "addressbook.csv", "DSpace" : "dspace.csv"} 
-		return os.path.join("./dataset", datasets.get("AddressBook")) # select dataset
+		return os.path.join("./dataset", datasets.get("DSpace")) # select dataset
 
 	def __str__(self) -> str:
 		return f"{self.__class__.__name__}({self._GET_DATA_DIR})"
@@ -66,6 +64,15 @@ class HandleCodeRepo:
 		except FileNotFoundError as e:
 			raise(e)
 	
+	def get_version(self) -> List[str]:
+		return [version for version in self.read_data()["version"]]
+	
+	def get_build(self) -> List[str]:
+		return [build for build in self.read_data()["build"]]
+	
+	def get_test(self) -> List[float]:
+		return [test for test in self.read_data()["test"]]
+
 	def get_hash(self) -> List[str]:
 		return [hash for hash in self.read_data()["hash"]]
 
@@ -78,7 +85,7 @@ class HandleCodeRepo:
 	def get_integration_test(self) -> List[float]:
 		return [code for code in self.read_data()["integration_test"]]
 
-	def unit_integration_test(self) -> List[float]:
+	def get_unit_integration_test(self) -> List[float]:
 		return [code for code in self.read_data()["unit_integration_test"]]
 
 	def get_trees(self, code) -> Union[Tuple[List[CompilationUnit], Dict[int, str]]]:

@@ -1,6 +1,9 @@
 import sys
 import re
+import csv
 import numpy as np
+import pandas as pd
+from math import isinf
 from os.path import dirname, abspath
 from typing import Dict, List, Tuple, Union, Set
 
@@ -33,21 +36,26 @@ class Helper(HandleCodeRepo):
 
     def modify_sourcecode(self) -> Sourcecode:
         modified = []
+
         for code in self.get_sourcecode():
             temp = re.sub(self.reg_ex_pattern().get("COMMENTS"), "", code)
             modified.append(temp)
+
         return modified
 
     def feature_extractor(self, *args) -> List[float]:
         features = []
+
         if self.__len__(args) >= 1:
             for feature_arg in args:
-                temp = []
+                feature = []
                 for file_length, feature_frequency in zip(self.get_file_length(), feature_arg):
                     with np.errstate(divide = "ignore"):
-                        temp.append(-np.log10(feature_frequency / file_length))
-                features.append(temp)
+                        temp = -np.log10(feature_frequency / file_length)
+                        feature.append(0.0) if isinf(temp) else feature.append(temp)
+                features.append(feature)
             return features
+            
         raise ValueError("Invalid argument. Only a feature sequence is accepted")
 
 class Layout(Helper):
@@ -110,25 +118,31 @@ class Extractor(Helper):
     def __init__(self) -> None:
         super().__init__()
 
-    def extract(self) -> FeatureVec:
+    def extract(self) -> List[List[FeatureVec]]:
         emptylines, codelines, spaces, tabs = Layout().get_frequency()
         imports, comments, keywords, methods = Lexical().get_frequency()
         conditionals, literals, loops, nodes  = Syntactic().get_frequency()
-        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes  = self.feature_extractor(
-        emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes)
+
+        return self.feature_extractor(emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes)
+
+class BuildData(Helper):
+    def __init__(self, path) -> None:
+        super().__init__()
+        self.FILE_PATH = path
+
+    def build_data(self) -> List[List[FeatureVec]]:
+        collector = []
+
+        for features in Extractor().extract():
+            collector.append(features)
+        collector.append(self.get_unit_test())
+        collector.append(self.get_integration_test())
+        collector.append(self.get_unit_integration_test())
         
-        
-        return {
-            "emptylines" : emptylines,
-            "codelines" : codelines,
-            "spaces" : spaces,
-            "tabs" : tabs,
-            "imports" : imports,
-            "comments" : comments,
-            "keywords" : keywords,
-            "methods" : methods, 
-            "conditionals" : conditionals,
-            "literals" : literals,
-            "loops" : loops,
-            "nodes" : nodes
-    	}
+        try:
+            with open(self.FILE_PATH, "w") as file:
+                with file:
+                    write = csv.writer(file)
+                    write.writerows(collector)
+        except OSError as e:
+            raise e
