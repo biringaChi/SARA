@@ -149,4 +149,13 @@ explore.py
 
 # datsets
 dspace.csv
+addressbook_processed.csv
+ASTData.txt
 dspace_processed.csv
+addressbook_aste.csv
+dspace_aste.csv
+dspace_aste_*.csv
+
+# vectors
+addressbook_node_vecs.wordvectors
+dspace_node_vecs.wordvectors

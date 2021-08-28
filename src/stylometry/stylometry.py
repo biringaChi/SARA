@@ -124,25 +124,7 @@ class Extractor(Helper):
         conditionals, literals, loops, nodes  = Syntactic().get_frequency()
 
         return self.feature_extractor(emptylines, codelines, spaces, tabs, imports, comments, keywords, methods, conditionals, literals, loops, nodes)
-
-class BuildData(Helper):
-    def __init__(self, path) -> None:
-        super().__init__()
-        self.FILE_PATH = path
-
-    def build_data(self) -> List[List[FeatureVec]]:
-        collector = []
-
-        for features in Extractor().extract():
-            collector.append(features)
-        collector.append(self.get_unit_test())
-        collector.append(self.get_integration_test())
-        collector.append(self.get_unit_integration_test())
-        
-        try:
-            with open(self.FILE_PATH, "w") as file:
-                with file:
-                    write = csv.writer(file)
-                    write.writerows(collector)
-        except OSError as e:
-            raise e
+    
+    def get_feature_names(self) -> List[str]:
+        return ["EmptyLines", "Codelines", "Space", "Tabs", "Imports", "Comments", "Keywords", "Methods", "Conditionals", "Literals", "Loops", "Nodes"]
+    

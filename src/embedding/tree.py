@@ -1,9 +1,10 @@
+import os
 import sys
 import csv
 import numpy as np
+import pandas as pd
 from gensim import models
 from javalang.ast import Node
-from nltk import RegexpTokenizer
 from gensim.models import Word2Vec
 from os.path import dirname, abspath
 from gensim.models import KeyedVectors
@@ -69,22 +70,22 @@ class TreeEmbeddings(HandleCodeRepo):
 		return selected 
 	
 	def model(self) -> models:
-		tokenizer = RegexpTokenizer("\w+")
-		tokens = [tokenizer.tokenize(node) for node in self.get_nodes()]
-		return Word2Vec(sentences = tokens, min_count = 1, size = 32)
+		return Word2Vec(sentences = self.select_nodes(), min_count = 1, size = 32)
 	
 	def save_vectors(self) -> None:
 		node_vecs = self.model().wv
-		node_vecs.save("node_vecs.wordvectors")
+		# node_vecs.save(os.getcwd() + "/src/embedding/" + "addressbook_node_vecs.wordvectors")
+		node_vecs.save(os.getcwd() + "/src/embedding/" + "dspace_node_vecs.wordvectors")
 	
 	def assign_vectors(self) -> List[List[float]]:
 		vec_dict = {}
 
-		node_vecs = KeyedVectors.load("node_vecs.wordvectors", mmap = "r")
+		# node_vecs = KeyedVectors.load(os.getcwd() + "/src/embedding/" + "addressbook_node_vecs.wordvectors", mmap = "r")
+		node_vecs = KeyedVectors.load(os.getcwd() + "/src/embedding/" + "dspace_node_vecs.wordvectors", mmap = "r")
 		for key in node_vecs.vocab:
 			vec_dict[key] = node_vecs[key]
 		node_vecs = []
-		for node_vec in self.node_types():
+		for node_vec in self.select_nodes():
 			temp = []
 			if node_vec is not None:
 				for node in node_vec:
@@ -118,19 +119,23 @@ class TreeEmbeddings(HandleCodeRepo):
 				cleaned.append(sublist)
 			else:
 				cleaned.append(sublist)
-				
+
 		return cleaned, max_length
 
-def build_tree_data(self) -> None:
-	try:
-		with open(self.FILE_PATH, "w") as file:
-			with file:
-				write = csv.writer(file)
-				write.writerows(self.clean_data())
-	except OSError as e:
-		raise e
+	def aste_data(self) -> None:
+		# _path: str = os.getcwd() + "/src/embedding/data/addressbook_aste.csv"
+		_path: str = os.getcwd() + "/src/embedding/data/dspace_aste.csv"
+		os.makedirs(os.path.dirname(_path), exist_ok = True)
+		try:
+			with open(_path, "w") as file:
+				with file:
+					write = csv.writer(file)
+					write.writerows(self.clean_data()[0])
+		except OSError as e:
+			raise e
 		
-def transform_tree_data(self) -> int:
-	max_length = self.clean_data()[1]
-	scalars = [f"scalar{i}" for i in range(max_length)]
-	return self.__len__(scalars)
+	def transform_tree_data(self, path) -> int:
+		max_length = self.clean_data()[1]
+		scalars = [f"scalar{i}" for i in range(max_length)]
+		return pd.read_csv(path, names = scalars)
+		
