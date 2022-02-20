@@ -107,7 +107,7 @@ class TreeEmbeddings(HandleCodeRepo):
 
 		return flatten_vecs
 	
-	def clean_data(self) -> Union[Tuple[List[float], int]]:
+	def clean_data(self):
 		cleaned = []
 
 		max_length = max([self.__len__(sub_list) for sub_list in self.flatten_vectors()]) #26656

@@ -88,7 +88,8 @@ class HandleCodeRepo:
 	def get_unit_integration_test(self) -> List[float]:
 		return [code for code in self.read_data()["unit_integration_test"]]
 
-	def get_trees(self, code) -> Union[Tuple[List[CompilationUnit], Dict[int, str]]]:
+	# def get_trees(self, code) -> Union[Tuple[List[CompilationUnit], Dict[int, str]]]:
+	def get_trees(self, code):
 		trees = []
 		uncompiled_sourcecode = {}
 
