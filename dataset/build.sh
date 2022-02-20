@@ -1,2 +1,3 @@
 # Uncompress
-gunzip -v dspace.csv.gz
+tar xvf data.tar.gz
+
