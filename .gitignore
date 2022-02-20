@@ -159,3 +159,8 @@ dspace_aste_*.csv
 # vectors
 addressbook_node_vecs.wordvectors
 dspace_node_vecs.wordvectors
+
+# performance experiments
+ASTs.java
+performance_experiments.java
+motivation
