@@ -1,6 +1,6 @@
  ## How to generate DSpace dataset
 
   ```
-  $ cd dataset
+  $ cd dataset/dspace
   $ sh build.sh
   ``` 
