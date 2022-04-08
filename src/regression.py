@@ -1,31 +1,24 @@
-import os
 import csv
-import sys
-from typing import Dict
 import numpy as np
 import pandas as pd
+from stylometry import Extractor
 from pandas.core.frame import DataFrame
-from os.path import dirname, abspath
-sys.path.append(dirname(dirname(abspath(__file__))))
-from stylometry.stylometry import Extractor
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression, SGDRegressor, Ridge, Lasso
+from sklearn.pipeline import make_pipeline
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import mean_absolute_error
-from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LinearRegression, SGDRegressor, Ridge, Lasso
 
 
 class BuildData(Extractor):
-    def __init__(self, FILE_PATH1: str = os.getcwd() + "/src/ML/data/addressbook_processed.csv", FILE_PATH2: str = os.getcwd() + "/data/dspace_processed.csv" ) -> None:
+    """
+    A pipeline of regression models
+    """
+    def __init__(self) -> None:
         super().__init__()
-        
-        os.makedirs(os.path.dirname(FILE_PATH1), exist_ok = True)
-        os.makedirs(os.path.dirname(FILE_PATH2), exist_ok = True)
-        self.FILE_PATH1 = FILE_PATH1
-        self.FILE_PATH2 = FILE_PATH2
+        self.FILE_PATH1 = "/src/data/addressbook_processed.csv"
+        self.FILE_PATH2 = "/src/data/dspace_processed.csv"
     
     def addressbook_processed(self) -> DataFrame:
         collector = []
@@ -85,13 +78,14 @@ class BuildData(Extractor):
         dspace = dspace.drop("Tabs", axis = 1)
 
         return dspace
+        
 
     def get_dspace(self) -> DataFrame:
         return self.dspace_processed()
     
 class RegressionPipeline(BuildData):
-    def __init__(self, FILE_PATH1: str, FILE_PATH2: str) -> None:
-        super().__init__(FILE_PATH1 = FILE_PATH1, FILE_PATH2 = FILE_PATH2)
+    def __init__(self) -> None:
+        super().__init__()
 
         self.MODELS = [LinearRegression(), 
 		make_pipeline(StandardScaler(), SGDRegressor(max_iter = 1000, tol = 1e-3)), 

@@ -1,24 +1,20 @@
 import os
-import sys
 import csv
 import numpy as np
 import pandas as pd
 from gensim import models
 from javalang.ast import Node
 from gensim.models import Word2Vec
-from os.path import dirname, abspath
 from gensim.models import KeyedVectors
 from javalang.parser import JavaParserError
-from typing import Dict, List, Sequence, Text, Tuple, Union, Set
-
-sys.path.append(dirname(dirname(abspath(__file__))))
-from utils.util import HandleCodeRepo
-
-"""
-Creates an Abstract Syntax Tree (AST) embedding structure.
-"""
+from typing import Dict, List, Sequence, Text, Union, Set
+from util import HandleCodeRepo
 
 class TreeEmbeddings(HandleCodeRepo):
+	"""
+	Creates an Abstract Syntax Tree (AST) embedding structure.
+	"""
+	
 	def __init__(self) -> None:
 		super().__init__()
 
@@ -72,16 +68,15 @@ class TreeEmbeddings(HandleCodeRepo):
 	def model(self) -> models:
 		return Word2Vec(sentences = self.select_nodes(), min_count = 1, size = 32)
 	
-	def save_vectors(self) -> None:
+	def save_vectors(self, vec_obj) -> None:
+		# Parse vector object as an argument 
 		node_vecs = self.model().wv
-		# node_vecs.save(os.getcwd() + "/src/embedding/" + "addressbook_node_vecs.wordvectors")
-		node_vecs.save(os.getcwd() + "/src/embedding/" + "dspace_node_vecs.wordvectors")
+		node_vecs.save(os.getcwd() + "/src/embedding/" + vec_obj)
 	
-	def assign_vectors(self) -> List[List[float]]:
+	def assign_vectors(self, vec_obj) -> List[List[float]]:
+		# Parse vector object as an argument 
 		vec_dict = {}
-
-		# node_vecs = KeyedVectors.load(os.getcwd() + "/src/embedding/" + "addressbook_node_vecs.wordvectors", mmap = "r")
-		node_vecs = KeyedVectors.load(os.getcwd() + "/src/embedding/" + "dspace_node_vecs.wordvectors", mmap = "r")
+		node_vecs = KeyedVectors.load(os.getcwd() + "/src/embedding/" + vec_obj, mmap = "r")
 		for key in node_vecs.vocab:
 			vec_dict[key] = node_vecs[key]
 		node_vecs = []
@@ -110,7 +105,7 @@ class TreeEmbeddings(HandleCodeRepo):
 	def clean_data(self):
 		cleaned = []
 
-		max_length = max([self.__len__(sub_list) for sub_list in self.flatten_vectors()]) #26656
+		max_length = max([self.__len__(sub_list) for sub_list in self.flatten_vectors()])
 		for sublist in self.flatten_vectors(): 
 			if not sublist:
 				cleaned.append(np.zeros(max_length).tolist())
@@ -122,9 +117,9 @@ class TreeEmbeddings(HandleCodeRepo):
 
 		return cleaned, max_length
 
-	def aste_data(self) -> None:
-		# _path: str = os.getcwd() + "/src/embedding/data/addressbook_aste.csv"
-		_path: str = os.getcwd() + "/src/embedding/data/dspace_aste.csv"
+	def aste_data(self, aste_vec) -> None:
+		# pass aste directory as an argument
+		_path: str = os.getcwd() + aste_vec
 		os.makedirs(os.path.dirname(_path), exist_ok = True)
 		try:
 			with open(_path, "w") as file:
@@ -138,4 +133,3 @@ class TreeEmbeddings(HandleCodeRepo):
 		max_length = self.clean_data()[1]
 		scalars = [f"scalar{i}" for i in range(max_length)]
 		return pd.read_csv(path, names = scalars)
-		

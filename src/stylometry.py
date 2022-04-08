@@ -1,16 +1,11 @@
-import sys
 import re
-import csv
 import numpy as np
-import pandas as pd
 from math import isinf
-from os.path import dirname, abspath
 from typing import Dict, List, Tuple, Union, Set
-
-sys.path.append(dirname(dirname(abspath(__file__))))
-from utils.util import HandleCodeRepo, Sourcecode, FeatureVec
+from util import HandleCodeRepo, Sourcecode, FeatureVec
 
 class Helper(HandleCodeRepo):
+    """Code-stylometry feature generator"""
     def __init__(self) -> None:
         super().__init__()
 
